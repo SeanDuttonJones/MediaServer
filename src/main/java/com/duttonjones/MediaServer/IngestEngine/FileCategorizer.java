@@ -1,5 +1,7 @@
 package com.duttonjones.MediaServer.IngestEngine;
 
+import com.duttonjones.MediaServer.IngestEngine.exceptions.CategoryNotFoundException;
+
 import java.io.File;
 import java.io.FileFilter;
 import java.nio.file.NotDirectoryException;
@@ -70,7 +72,7 @@ public class FileCategorizer {
 
     public FileCluster getFileCluster(String category) {
         if(!fileClusters.containsKey(category)) {
-            throw new CategoryNotFoundException();
+            throw new CategoryNotFoundException("category: unknown category '" + category + "'");
         }
 
         return fileClusters.get(category);

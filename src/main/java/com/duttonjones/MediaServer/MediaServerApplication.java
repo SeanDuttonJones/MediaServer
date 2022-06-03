@@ -16,16 +16,12 @@ public class MediaServerApplication {
 		// Quick Test of IngestEngine V2
 		IngestEngine ingestEngine = IngestEngine.getInstance();
 
-		IngestService s = new LocalFileIngestService("LocalFileIngestService");
+		LocalFileIngestService s = new LocalFileIngestService("LocalFileIngestService");
 		ingestEngine.registerService(s);
 
 		s.start();
 
-		try {
-			Thread.sleep(3000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+		System.out.println(s.getLocalFiles());
 
 		s.stop();
 	}

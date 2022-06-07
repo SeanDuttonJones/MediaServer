@@ -12,17 +12,17 @@ public class MediaServerApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(MediaServerApplication.class, args);
 
-		// TODO: Remove Later
-		// Quick Test of IngestEngine V2
-		IngestEngine ingestEngine = IngestEngine.getInstance();
-
-		LocalFileIngestService s = new LocalFileIngestService("LocalFileIngestService");
-		ingestEngine.registerService(s);
-
-		s.start();
-
-		System.out.println(s.getLocalFiles());
-
-		s.stop();
+//		// TODO: Remove Later
+//		// Quick Test of IngestEngine V2
+//		IngestEngine ingestEngine = IngestEngine.getInstance();
+//
+//		LocalFileIngestService s = new LocalFileIngestService("LocalFileIngestService");
+//		ingestEngine.registerService(s);
+//
+//		s.start();
+//
+//		System.out.println(s.getLocalFiles());
+//
+//		s.stop();
 	}
 }

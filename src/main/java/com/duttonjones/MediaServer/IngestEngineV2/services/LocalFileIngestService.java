@@ -5,9 +5,9 @@ import com.duttonjones.MediaServer.IngestEngineV2.core.IngestService;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class LocalFileIngestService extends IngestService {
 
@@ -22,26 +22,35 @@ public class LocalFileIngestService extends IngestService {
         localFiles = new ArrayList<>();
     }
 
-    private void ingestLocalFiles() {
-        LinkedList<File> directories = new LinkedList<>();
-        directories.add(parentDirectory);
+//    private void ingestLocalFiles() {
+//        LinkedList<File> directories = new LinkedList<>();
+//        directories.add(parentDirectory);
+//
+//        while(!directories.isEmpty()) {
+//            File directory = directories.poll();
+//
+//            File[] files = directory.listFiles();
+//            if(files == null) {
+//                continue;
+//            }
+//
+//            for(File f : files) {
+//                if(f.isDirectory() && !directories.contains(f)) {
+//                    directories.add(f);
+//                }
+//            }
+//
+//            localFiles.addAll(Arrays.asList(files));
+//        }
+//    }
 
-        while(!directories.isEmpty()) {
-            File directory = directories.poll();
-
-            File[] files = directory.listFiles();
-            if(files == null) {
-                continue;
-            }
-
-            for(File f : files) {
-                if(f.isDirectory() && !directories.contains(f)) {
-                    directories.add(f);
-                }
-            }
-
-            localFiles.addAll(Arrays.asList(files));
+    private ArrayList<File> listFiles(Path path) throws IOException {
+        List<File> files;
+        try(Stream<Path> walk = Files.walk(path)) {
+            files = walk.filter(Files::isRegularFile).map(Path::toFile).collect(Collectors.toList());
         }
+
+        return (ArrayList<File>) files;
     }
 
     private void handleParentDirectoryChange(WatchEvent<?> event) {
@@ -81,13 +90,12 @@ public class LocalFileIngestService extends IngestService {
         super.start();
         System.out.println("LocalFileIngestService: starting...");
 
-        ingestLocalFiles();
-
-        try {
-            startParentDirectoryWatchService();
-        } catch (IOException | InterruptedException e) {
-            e.printStackTrace();
-        }
+//        try {
+//            localFiles.addAll(listFiles(parentDirectory.toPath()));
+//            startParentDirectoryWatchService();
+//        } catch (IOException | InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override
@@ -98,5 +106,10 @@ public class LocalFileIngestService extends IngestService {
 
     public ArrayList<File> getLocalFiles() {
         return localFiles;
+    }
+    public ArrayList<File> getLocalFiles(Comparator<File> comparator) {
+        ArrayList<File> sortedFiles = new ArrayList<>(localFiles);
+        sortedFiles.sort(comparator);
+        return sortedFiles;
     }
 }

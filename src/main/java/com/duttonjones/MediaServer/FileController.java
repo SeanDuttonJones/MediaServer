@@ -3,18 +3,17 @@ package com.duttonjones.MediaServer;
 import com.duttonjones.MediaServer.IngestEngine.*;
 import com.duttonjones.MediaServer.IngestEngine.exceptions.CategoryNotFoundException;
 import com.duttonjones.MediaServer.IngestEngine.exceptions.InvalidParamterException;
+import com.duttonjones.MediaServer.IngestEngineV2.FileLister;
+import com.duttonjones.MediaServer.IngestEngineV2.ImageFileFilter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.NotDirectoryException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 public class FileController {
@@ -23,11 +22,12 @@ public class FileController {
 
     public FileController() {
         try {
-            File file = new File("/home/dev/Desktop/MediaServerTest");
+//            File file = new File("/home/dev/Desktop/MediaServerTest");
+            File file = new File("/Users/seanduttonjones/Desktop/MediaServerTest");
             fileCategorizer = new FileCategorizer(file);
 
             FileCategory documentCat = new FileCategory("documents", new String[]{".txt"});
-            FileCategory imageCat = new FileCategory("images", new String[]{".jpg"});
+            FileCategory imageCat = new FileCategory("images", new String[]{".jpg", ".png"});
             FileCategory videoCat = new FileCategory("videos", new String[]{".mp4"});
             FileCategory allCat = new FileCategory("all", new String[]{""});
 
@@ -50,27 +50,48 @@ public class FileController {
         return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
+//    @GetMapping(value = "files/{category}/list", produces = MediaType.APPLICATION_JSON_VALUE)
+//    public FileCluster listFiles(@PathVariable("category") String category,
+//                                 @RequestParam(name = "sortBy", required = false) String sortBy,
+//                                 @RequestParam(name = "reversed", required = false, defaultValue = "false") boolean reversed) {
+//
+//        FileCluster fileCluster = fileCategorizer.getFileCluster(category);
+//
+//        if(sortBy != null) {
+//            switch (sortBy) {
+//                case "creationDate" -> fileCluster.sort(new FileCreationDateComparator());
+//                case "lastModified" -> fileCluster.sort(new FileModifiedDateComparator());
+//                case "name" -> fileCluster.sort(new FileNameComparator());
+//                default -> throw new InvalidParamterException("sortBy: unknown sort method '" + sortBy + "'");
+//            }
+//
+//            if(reversed) {
+//                Collections.reverse(fileCluster);
+//            }
+//        }
+//
+//        return fileCluster;
+//    }
+
     @GetMapping(value = "files/{category}/list", produces = MediaType.APPLICATION_JSON_VALUE)
-    public FileCluster listFiles(@PathVariable("category") String category,
+    public List<File> listFiles(@PathVariable("category") String category,
                                  @RequestParam(name = "sortBy", required = false) String sortBy,
-                                 @RequestParam(name = "reversed", required = false, defaultValue = "false") boolean reversed) {
+                                 @RequestParam(name = "reversed", required = false, defaultValue = "false") boolean reversed)
+            throws IOException {
 
-        FileCluster fileCluster = fileCategorizer.getFileCluster(category);
-
+        FileLister fileLister = new FileLister(new File("/Users/seanduttonjones/Desktop/MediaServerTest"));
+        List<File> files = fileLister.listFiles();
         if(sortBy != null) {
             switch (sortBy) {
-                case "creationDate" -> fileCluster.sort(new FileCreationDateComparator());
-                case "lastModified" -> fileCluster.sort(new FileModifiedDateComparator());
-                case "name" -> fileCluster.sort(new FileNameComparator());
-                default -> throw new InvalidParamterException("sortBy: unknown sort method '" + sortBy + "'");
-            }
-
-            if(reversed) {
-                Collections.reverse(fileCluster);
+                case "creationDate" -> files = fileLister.listFiles(new ImageFileFilter(), new FileCreationDateComparator());
             }
         }
 
-        return fileCluster;
+        if(reversed) {
+            Collections.reverse(files);
+        }
+
+        return files;
     }
 
     @GetMapping("/categories")

@@ -41,7 +41,7 @@ public class FileListController {
     }
 
     @GetMapping(value = "files/{type}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<File> listFiles(@PathVariable("type") String type,
+    public List<String> listFiles(@PathVariable("type") String type,
                                 @RequestParam(name = "sortBy", required = false, defaultValue = "creationDate") String sortBy,
                                 @RequestParam(name = "reversed", required = false, defaultValue = "false") boolean reversed)
             throws IOException {
@@ -62,7 +62,14 @@ public class FileListController {
                     .collect(Collectors.toList());
         }
 
-        return files;
+        List<String> locations = new ArrayList<>();
+        for(File f : files) {
+            String path = f.getPath();
+            path = path.replace(defaultMediaDirectory.getPath(), "http://localhost:8000");
+            locations.add(path);
+        }
+
+        return locations;
     }
 
     @ExceptionHandler(value = {CategoryNotFoundException.class, InvalidParamterException.class, IllegalArgumentException.class})
